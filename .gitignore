@@ -1,0 +1,122 @@
+# Created by Gemini - https://gemini.google.com/
+# Gitignore for Flask (Python) backend and Vue.js (Node.js) frontend project
+
+# --- Python / Flask Specific (BE folder) ---
+# General Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+# Assumes venv might be inside BE or project root
+BE/venv/
+BE/.venv/
+BE/env/
+BE/.env/
+venv/
+.venv/
+env/
+.env/
+
+# Distribution / packaging
+BE/build/
+BE/dist/
+BE/*.egg-info/
+build/
+dist/
+*.egg-info/
+
+# Flask instance folder (if inside BE or project root)
+BE/instance/
+instance/
+
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+BE/.coverage
+BE/.coverage.*
+BE/htmlcov/
+
+# Log files
+*.log
+logs/
+BE/*.log
+BE/logs/
+
+# --- AutoGluon / ML Specific (if applicable, from previous context) ---
+# Adjust path if these are inside BE or a specific data folder
+models_output/
+data/uploads/
+BE/models_output/
+BE/data/uploads/
+
+# --- Node.js / Vue.js Specific (FE folder) ---
+# Dependencies
+FE/node_modules/
+node_modules/ # If node_modules could be at root for some reason
+
+# Build output
+FE/dist/
+dist/ # If dist could be at root
+FE/public/ # If Vue outputs static assets here that are not source
+FE/.nuxt/ # For Nuxt.js projects
+FE/.output/ # For Nuxt 3 projects
+
+# Log files
+FE/npm-debug.log*
+FE/yarn-error.log*
+FE/yarn-debug.log*
+FE/pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment variables (commit .env.example, not .env)
+FE/.env
+FE/.env.*
+!.env.example 
+!.env.sample
+# If .env could be at root
+.env
+.env.*
+!.env.example
+!.env.sample
+
+
+# Test reports and coverage
+FE/coverage/
+FE/coverage-jest/
+FE/junit.xml
+FE/.nyc_output
+coverage/
+
+# Cache files
+FE/.eslintcache
+FE/.stylelintcache
+FE/.cache/
+FE/.vite/ # For Vite projects
+
+# --- OS Generated Files ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# --- IDE / Editor Specific ---
+# Common for many editors, place at the end
+.idea/
+.vscode/
+# Note: You might want to commit shared project settings
+# !.vscode/settings.json
+# !.vscode/launch.json
+*.sublime-project
+*.sublime-workspace
