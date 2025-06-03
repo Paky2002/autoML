@@ -1,16 +1,47 @@
+# BE/run.py
 import sys
 import os
+from pathlib import Path
 
-# Add the root of the project to sys.path to ensure Python can find the 'app' module
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'app')))
+# Add the app directory to the Python path
+current_dir = Path(__file__).parent
+app_dir = current_dir / 'app'
+sys.path.insert(0, str(app_dir))
 
-# Import the create_app function from the app package
-from app import create_app  # Ensure the 'create_app' module is imported correctly
+# Import the create_app function
+from app import create_app
+from config.config import config
 
-# Create an instance of the Flask application
-app = create_app()
+def main():
+    """Main application entry point"""
+    
+    # Get environment configuration
+    env = os.getenv('FLASK_ENV', 'development')
+    config_class = config.get(env, config['default'])
+    
+    # Create Flask application
+    app = create_app(config_class)
+    
+    # Get host and port from environment or use defaults
+    host = os.getenv('FLASK_HOST', '0.0.0.0')
+    port = int(os.getenv('FLASK_PORT', 5000))
+    debug = os.getenv('FLASK_DEBUG', 'true').lower() == 'true' and env == 'development'
+    
+    print(f"Starting AutoML API server...")
+    print(f"Environment: {env}")
+    print(f"Debug mode: {debug}")
+    print(f"Server: http://{host}:{port}")
+    print(f"API Documentation: http://{host}:{port}/api/docs")
+    print(f"Health Check: http://{host}:{port}/api/health")
+    
+    # Run the Flask server
+    app.run(
+        host=host,
+        port=port,
+        debug=debug,
+        use_reloader=debug,
+        threaded=True
+    )
 
-# Run the Flask server
 if __name__ == "__main__":
-    # Start the server in debug mode for development (optional, turn off for production)
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    main()
