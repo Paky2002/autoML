@@ -68,14 +68,17 @@
             :key="model.uuid"
             :data-status="model.status"
             :class="[
-              'transition-all duration-200 hover:bg-white/5 cursor-pointer group',
+              'transition-all duration-200 hover:bg-white/5',
               model.status === 'training' ? 'opacity-75' : '',
               index % 2 === 0 ? 'bg-white/2' : 'bg-transparent'
             ]"
-            @click="$emit('view-model', model.uuid)"
           >
+            <!-- Model Name -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-white/80 border-r border-white/5">
-              <div class="flex items-center gap-3">
+              <div 
+                class="flex items-center gap-3 cursor-pointer"
+                @click="$emit('view-model', model.uuid)"
+              >
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                   <Brain class="w-4 h-4 text-white" />
                 </div>
@@ -85,6 +88,8 @@
                 </div>
               </div>
             </td>
+
+            <!-- Status -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-white/80 border-r border-white/5">
               <StatusBadge 
                 :status="model.status" 
@@ -92,25 +97,36 @@
                 :show-progress="true"
               />
             </td>
+
+            <!-- Problem Type -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-white/80 border-r border-white/5">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/10 text-white/90 capitalize">
                 {{ model.problem_type }}
               </span>
             </td>
+
+            <!-- Target Feature -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-white/80 border-r border-white/5">
               <span class="font-mono">{{ model.target_feature }}</span>
             </td>
+
+            <!-- Score -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-white/80 border-r border-white/5">
               <span v-if="model.best_score" class="font-mono text-green-400">
                 {{ formatScore(model.best_score) }}
               </span>
               <span v-else class="text-white/50">—</span>
             </td>
+
+            <!-- Created -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-white/80 border-r border-white/5">
               <span class="font-mono">{{ formatDate(model.created_at) }}</span>
             </td>
+
+            <!-- Actions -->
             <td class="px-6 py-4 whitespace-nowrap text-sm text-white/80">
-              <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div class="flex items-center gap-2">
+                <!-- View Button -->
                 <button
                   @click.stop="$emit('view-model', model.uuid)"
                   class="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/20 transition-all duration-200 group/btn"
@@ -118,6 +134,8 @@
                 >
                   <Eye class="w-4 h-4 text-white/70 group-hover/btn:text-white" />
                 </button>
+
+                <!-- Predict Button - Only for completed models -->
                 <button
                   v-if="model.status === 'completed'"
                   @click.stop="handlePredict(model.uuid)"
@@ -126,6 +144,8 @@
                 >
                   <Zap class="w-4 h-4 text-blue-400 group-hover/btn:text-blue-300" />
                 </button>
+
+                <!-- Delete Button -->
                 <button
                   @click.stop="$emit('delete-model', model.uuid)"
                   :disabled="model.status === 'training'"
@@ -250,11 +270,8 @@ button:hover:not(:disabled) {
 }
 
 /* Disabilita click per modelli in training (tranne actions) */
-tbody tr[data-status="training"] {
+tbody tr[data-status="training"] .cursor-pointer {
   cursor: default;
-}
-
-tbody tr[data-status="training"] td:not(:last-child) {
   pointer-events: none;
 }
 </style>

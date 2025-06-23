@@ -34,6 +34,7 @@
           :models="models"
           @view-model="handleViewModel"
           @delete-model="handleDeleteModel"
+          @refresh="fetchModels"
         />
       </div>
 
@@ -92,35 +93,41 @@ import { useRouter } from 'vue-router';
 import { AlertCircle, Trash2 } from 'lucide-vue-next';
 import Aura from '../components/common/Aura.vue';
 import ModelsTable from '../components/common/ModelsTable.vue';
+import { useApi } from '../composables/useApi';
 import type { TrainedModel } from '../types';
 
 const router = useRouter();
 
+// Usa il composable API invece di chiamate dirette
+const { getAllModels, deleteModel, isLoading, error } = useApi();
+
 const models = ref<TrainedModel[]>([]);
-const isLoading = ref(true);
-const error = ref<string | null>(null);
 const modelToDelete = ref<TrainedModel | null>(null);
 const isDeleting = ref(false);
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+// Cache per evitare chiamate multiple
+let modelsCache: TrainedModel[] | null = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 30000; // 30 secondi
 
-const fetchModels = async () => {
+const fetchModels = async (forceRefresh = false) => {
   try {
-    isLoading.value = true;
-    error.value = null;
-    
-    const response = await fetch(`${apiUrl}/api/models`);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    // Usa cache se disponibile e recente
+    const now = Date.now();
+    if (!forceRefresh && modelsCache && (now - lastFetchTime) < CACHE_DURATION) {
+      models.value = modelsCache;
+      return;
     }
+
+    const fetchedModels = await getAllModels();
+    models.value = fetchedModels;
     
-    const data = await response.json();
-    models.value = data.models || [];
+    // Aggiorna cache
+    modelsCache = fetchedModels;
+    lastFetchTime = now;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load models';
-  } finally {
-    isLoading.value = false;
+    console.error('Failed to fetch models:', err);
+    // Error già gestito dal composable
   }
 };
 
@@ -145,19 +152,19 @@ const confirmDelete = async () => {
   try {
     isDeleting.value = true;
     
-    const response = await fetch(`${apiUrl}/api/models/${modelToDelete.value.uuid}`, {
-      method: 'DELETE',
-    });
+    const success = await deleteModel(modelToDelete.value.uuid);
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (success) {
+      // Remove from local state immediately
+      models.value = models.value.filter(m => m.uuid !== modelToDelete.value!.uuid);
+      // Invalida cache
+      modelsCache = models.value;
+      lastFetchTime = Date.now();
     }
     
-    // Remove from local state
-    models.value = models.value.filter(m => m.uuid !== modelToDelete.value!.uuid);
     modelToDelete.value = null;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to delete model';
+    console.error('Failed to delete model:', err);
   } finally {
     isDeleting.value = false;
   }

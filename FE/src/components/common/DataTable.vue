@@ -5,6 +5,10 @@
       <p class="text-sm text-white/70 mt-1">
         Showing first {{ displayRows.length }} of {{ totalRows }} rows
       </p>
+      <!-- Debug info - rimuovi dopo aver risolto -->
+      <div class="text-xs text-yellow-300 mt-2">
+        Headers: {{ headers.length }} | First row cells: {{ displayRows[0]?.length || 0 }}
+      </div>
     </div>
     
     <div class="overflow-y-auto flex-grow rounded-2xl mt-4 scrollbar-dark">
@@ -12,8 +16,8 @@
         <thead class="sticky top-0 z-10 bg-black/40 backdrop-blur-md">
           <tr>
             <th
-              v-for="header in headers"
-              :key="header"
+              v-for="(header, headerIndex) in headers"
+              :key="`header-${headerIndex}`"
               class="px-6 py-4 text-left text-xs font-semibold text-white/90 uppercase tracking-wider border-b border-white/20"
             >
               {{ header }}
@@ -22,19 +26,20 @@
         </thead>
         <tbody class="divide-y divide-white/5">
           <tr
-            v-for="(row, index) in displayRows"
-            :key="index"
+            v-for="(row, rowIndex) in displayRows"
+            :key="`row-${rowIndex}`"
             :class="[
               'transition-all duration-200 hover:bg-white/5',
-              index % 2 === 0 ? 'bg-white/2' : 'bg-transparent'
+              rowIndex % 2 === 0 ? 'bg-white/2' : 'bg-transparent'
             ]"
           >
+            <!-- Assicuriamoci che il numero di celle corrisponda al numero di headers -->
             <td
-              v-for="(cell, cellIndex) in row"
-              :key="cellIndex"
+              v-for="(header, cellIndex) in headers"
+              :key="`cell-${rowIndex}-${cellIndex}`"
               class="px-6 py-4 whitespace-nowrap text-sm text-white/80 border-r border-white/5 last:border-r-0"
             >
-              <span class="font-mono">{{ formatCell(cell) }}</span>
+              <span class="font-mono">{{ formatCell(row[cellIndex]) }}</span>
             </td>
           </tr>
         </tbody>
@@ -44,11 +49,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 interface Props {
   headers: string[];
-  previewRows: any[][]; // Cambiato da 'rows' a 'previewRows' per chiarezza
+  previewRows: any[][];
   totalRows: number;
   maxRows?: number;
 }
@@ -57,10 +62,35 @@ const props = withDefaults(defineProps<Props>(), {
   maxRows: 50
 });
 
-// Usa previewRows invece di rows per la visualizzazione
-const displayRows = computed(() => 
-  props.previewRows.slice(0, props.maxRows)
-);
+// Debug: monitora i dati in arrivo
+watch(() => [props.headers, props.previewRows], ([newHeaders, newRows]) => {
+  console.log('DataTable received:');
+  console.log('Headers:', newHeaders);
+  console.log('Headers count:', newHeaders?.length);
+  console.log('First row:', newRows?.[0]);
+  console.log('First row length:', newRows?.[0]?.length);
+  console.log('Sample rows:', newRows?.slice(0, 3));
+}, { immediate: true });
+
+const displayRows = computed(() => {
+  const rows = props.previewRows.slice(0, props.maxRows);
+  
+  // Assicuriamoci che ogni riga abbia il numero corretto di celle
+  return rows.map(row => {
+    if (Array.isArray(row)) {
+      // Se la riga è un array, assicuriamoci che abbia la lunghezza giusta
+      const processedRow = row.slice(0, props.headers.length);
+      // Aggiungi celle vuote se mancano
+      while (processedRow.length < props.headers.length) {
+        processedRow.push('');
+      }
+      return processedRow;
+    } else {
+      // Se la riga è un oggetto, convertila in array nell'ordine degli headers
+      return props.headers.map(header => row[header] ?? '');
+    }
+  });
+});
 
 const formatCell = (cell: any): string => {
   if (cell === null || cell === undefined) return '';
