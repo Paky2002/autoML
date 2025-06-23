@@ -48,7 +48,7 @@ import { computed } from 'vue';
 
 interface Props {
   headers: string[];
-  rows: any[][];
+  previewRows: any[][]; // Cambiato da 'rows' a 'previewRows' per chiarezza
   totalRows: number;
   maxRows?: number;
 }
@@ -57,8 +57,9 @@ const props = withDefaults(defineProps<Props>(), {
   maxRows: 50
 });
 
+// Usa previewRows invece di rows per la visualizzazione
 const displayRows = computed(() => 
-  props.rows.slice(0, props.maxRows)
+  props.previewRows.slice(0, props.maxRows)
 );
 
 const formatCell = (cell: any): string => {

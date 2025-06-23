@@ -5,11 +5,11 @@ import Papa from 'papaparse';
 interface DatasetDTO {
   filename: string;
   headers: string[];
-  rows: any[][];
+  rows: any[][]; // Questo ora conterrà TUTTI i dati
   totalRows: number;
   fileSize: number;
   columns: ColumnInfo[];
-  preview: any[];
+  preview: any[]; // Questo sarà solo per l'anteprima UI
 }
 
 interface ColumnInfo {
@@ -48,11 +48,11 @@ self.onmessage = function(event) {
           }
           
           const headers = rawData[0] as string[];
-          const rows = rawData.slice(1);
+          const rows = rawData.slice(1); // TUTTI i dati, non limitati
           
           updateProgress('analyzing', 70);
           
-          // Analyze columns
+          // Analyze columns usando tutti i dati per una analisi più accurata
           const columns: ColumnInfo[] = headers.map((header, index) => {
             const columnData = rows
               .map(row => row[index])
@@ -82,11 +82,11 @@ self.onmessage = function(event) {
           const dataset: DatasetDTO = {
             filename,
             headers,
-            rows: rows.slice(0, 50),
+            rows: rows, // TUTTI i dati per il training
             totalRows: rows.length,
             fileSize: file.size,
             columns,
-            preview: rows.slice(0, 10).map(row => {
+            preview: rows.slice(0, 10).map(row => { // Solo per l'anteprima UI
               const obj: any = {};
               headers.forEach((header, index) => {
                 obj[header] = row[index];

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import TrainModel from '../views/TrainModel.vue';
 import ViewModel from '../views/ViewModel.vue';
+import ModelDetail from '../views/ModelDetail.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,6 +24,14 @@ const router = createRouter({
       component: ViewModel,
       meta: {
         title: 'View Models'
+      }
+    },
+    {
+      path: '/models/:uuid',
+      name: 'ModelDetail',
+      component: ModelDetail,
+      meta: {
+        title: 'Model Details'
       }
     }
   ]

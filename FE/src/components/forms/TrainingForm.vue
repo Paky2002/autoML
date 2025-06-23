@@ -3,6 +3,20 @@
     <h3 class="text-xl font-semibold text-white mb-6">Training Configuration</h3>
     
     <form @submit.prevent="handleSubmit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Model Name -->
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-white/90 mb-2">
+          Model Name *
+        </label>
+        <input
+          v-model="form.modelName"
+          type="text"
+          required
+          placeholder="Enter a name for your model"
+          class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200 backdrop-blur-sm"
+        >
+      </div>
+
       <!-- Target Feature -->
       <div>
         <label class="block text-sm font-medium text-white/90 mb-2">
@@ -140,6 +154,7 @@ const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const form = ref<TrainingConfig>({
+  modelName: '',
   targetFeature: '',
   problemType: 'regression',
   timeLimit: 600,
@@ -153,7 +168,7 @@ const availableColumns = computed(() =>
 );
 
 const isFormValid = computed(() => 
-  form.value.targetFeature && form.value.problemType
+  form.value.modelName && form.value.targetFeature && form.value.problemType
 );
 
 const handleSubmit = () => {
